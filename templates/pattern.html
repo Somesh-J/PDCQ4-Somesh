@@ -5,59 +5,152 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pattern Generator - FormulaQ</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
-        <h1>🎨 Pattern Generator</h1>
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <h1><span>🎨</span> FormulaQ Pattern Studio</h1>
+            <p style="color: var(--text-secondary); font-size: 1.1rem;">Create stunning diamond patterns with precision</p>
+        </div>
         
         <div class="user-info-small">
-            <p><strong>User:</strong> {{ user.name }} | <strong>Time:</strong> {{ ist_time }}</p>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span>👤</span>
+                <strong>{{ user.name }}</strong>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span>🕰️</span>
+                <span>{{ ist_time }}</span>
+            </div>
         </div>
         
         <!-- Pattern Generation Form -->
         <div class="pattern-section">
-            <h2>Generate Star Pattern</h2>
-            <p>Enter a number between 1 and 100 to create a symmetrical star pattern.</p>
-            
             <form method="POST" action="{{ url_for('main.pattern') }}">
-                <label for="num_lines">Number of Lines:</label>
-                <input 
-                    type="number" 
-                    id="num_lines" 
-                    name="num_lines" 
-                    min="1" 
-                    max="100" 
-                    placeholder="e.g., 16 or 21" 
-                    value="{% if num_lines %}{{ num_lines }}{% endif %}"
-                    required
-                    autofocus>
-                <button type="submit" class="btn btn-primary">✨ Display Pattern</button>
+                <div class="form-group">
+                    <label for="num_lines">
+                        <span style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span>🔢</span> Number of Lines
+                        </span>
+                    </label>
+                    <input 
+                        type="number" 
+                        id="num_lines" 
+                        name="num_lines" 
+                        min="1" 
+                        max="100" 
+                        placeholder="e.g., 16 or 21" 
+                        value="{% if num_lines %}{{ num_lines }}{% endif %}"
+                        required
+                        autofocus
+                    >
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; font-size: 1.1rem; padding: 1rem;">
+                    <span class="loading" id="loadingSpinner" style="display: none;"></span>
+                    <span id="buttonText"><span>✨</span> Generate Pattern <span>✨</span></span>
+                </button>
             </form>
         </div>
         
         <!-- Error Message -->
         {% if error %}
         <div class="error-message">
-            <p>❌ {{ error }}</p>
+            <h3 style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                <span>❌</span> Pattern Generation Notice
+            </h3>
+            <p>{{ error }}</p>
         </div>
         {% endif %}
         
         <!-- Pattern Output -->
         {% if pattern %}
         <div class="pattern-info">
-            <p>✅ <strong>Lines Generated:</strong> {{ num_lines }} | <strong>Generated at:</strong> {{ ist_time }}</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="success-checkmark">✅</span>
+                    <strong>Pattern Generated Successfully!</strong>
+                </div>
+                <div style="display: flex; align-items: center; gap: 1rem; font-size: 0.875rem; color: var(--text-secondary);">
+                    <span><strong>Lines:</strong> {{ num_lines }}</span>
+                    <span><strong>Generated:</strong> {{ ist_time }}</span>
+                </div>
+            </div>
         </div>
         
         <div class="pattern-output">
-<pre>{{ pattern }}</pre>
+            <div style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="color: #a7f3d0; font-size: 1rem; font-weight: 600;">FormulaQ Diamond Pattern</h3>
+                <button onclick="copyPattern()" style="background: rgba(167, 243, 208, 0.1); border: 1px solid rgba(167, 243, 208, 0.3); color: #a7f3d0; padding: 0.5rem 1rem; border-radius: var(--radius-sm); cursor: pointer; font-size: 0.875rem;">
+                    <span>📋</span> Copy Pattern
+                </button>
+            </div>
+            <pre id="patternContent">{{ pattern }}</pre>
         </div>
+        
+
         {% endif %}
         
-        <!-- Navigation Buttons -->
-        <div style="margin-top: 30px;">
-            <a href="{{ url_for('main.home') }}" class="btn btn-primary">🏠 Back to Home</a>
-            <a href="{{ url_for('auth.logout') }}" class="btn btn-secondary">🚪 Sign Out</a>
+        <!-- Action Buttons -->
+        <div class="navigation-buttons">
+            <a href="{{ url_for('main.home') }}" class="btn btn-primary">
+                <span>🏠</span> Back to Home
+            </a>
+            {% if pattern %}
+            <button onclick="generateNewPattern()" class="btn" style="background: linear-gradient(135deg, var(--success-color), #059669);">
+                <span>🔄</span> New Pattern
+            </button>
+            {% endif %}
+            <a href="{{ url_for('auth.logout') }}" class="btn btn-secondary">
+                <span>🚪</span> Sign Out
+            </a>
         </div>
+        
     </div>
+    
+    <script>
+        // Copy pattern to clipboard
+        function copyPattern() {
+            const patternContent = document.getElementById('patternContent');
+            const textArea = document.createElement('textarea');
+            textArea.value = patternContent.textContent;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            
+            // Show feedback
+            const button = event.target.closest('button');
+            const originalText = button.innerHTML;
+            button.innerHTML = '<span>✓</span> Copied!';
+            button.style.background = 'rgba(16, 185, 129, 0.2)';
+            button.style.borderColor = 'rgba(16, 185, 129, 0.5)';
+            
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.style.background = 'rgba(167, 243, 208, 0.1)';
+                button.style.borderColor = 'rgba(167, 243, 208, 0.3)';
+            }, 2000);
+        }
+        
+        // Generate new pattern (clear form)
+        function generateNewPattern() {
+            document.getElementById('num_lines').value = '';
+            document.getElementById('num_lines').focus();
+        }
+        
+        // Form submission loading state
+        document.querySelector('form').addEventListener('submit', function() {
+            const spinner = document.getElementById('loadingSpinner');
+            const buttonText = document.getElementById('buttonText');
+            const button = this.querySelector('button[type="submit"]');
+            
+            spinner.style.display = 'inline-block';
+            buttonText.style.display = 'none';
+            button.disabled = true;
+        });
+    </script>
 </body>
 </html>
