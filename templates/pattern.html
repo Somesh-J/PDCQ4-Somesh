@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pattern Generator - FormulaQ</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Pattern Generator</h1>
+        
+        <div class="user-info-small">
+            <p><strong>User:</strong> {{ user.name }} | <strong>Time:</strong> {{ ist_time }}</p>
+        </div>
+        
+        <!-- Pattern Generation Form -->
+        <div class="pattern-section">
+            <h2>Generate Star Pattern</h2>
+            <p>Enter a number between 1 and 100 to create a symmetrical star pattern.</p>
+            
+            <form method="POST" action="{{ url_for('main.pattern') }}">
+                <label for="num_lines">Number of Lines:</label>
+                <input 
+                    type="number" 
+                    id="num_lines" 
+                    name="num_lines" 
+                    min="1" 
+                    max="100" 
+                    placeholder="e.g., 16 or 21" 
+                    value="{% if num_lines %}{{ num_lines }}{% endif %}"
+                    required
+                    autofocus>
+                <button type="submit" class="btn btn-primary">✨ Display Pattern</button>
+            </form>
+        </div>
+        
+        <!-- Error Message -->
+        {% if error %}
+        <div class="error-message">
+            <p>❌ {{ error }}</p>
+        </div>
+        {% endif %}
+        
+        <!-- Pattern Output -->
+        {% if pattern %}
+        <div class="pattern-info">
+            <p>✅ <strong>Lines Generated:</strong> {{ num_lines }} | <strong>Generated at:</strong> {{ ist_time }}</p>
+        </div>
+        
+        <div class="pattern-output">
+<pre>{{ pattern }}</pre>
+        </div>
+        {% endif %}
+        
+        <!-- Navigation Buttons -->
+        <div style="margin-top: 30px;">
+            <a href="{{ url_for('main.home') }}" class="btn btn-primary">🏠 Back to Home</a>
+            <a href="{{ url_for('auth.logout') }}" class="btn btn-secondary">🚪 Sign Out</a>
+        </div>
+    </div>
+</body>
+</html>
