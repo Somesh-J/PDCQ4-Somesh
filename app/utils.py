@@ -23,79 +23,41 @@ def get_ist_time():
     
     return formatted_time
 
-
 def generate_pattern(n: int) -> str:
-    """
-    Hard-coded FormulaQ patterns for n=16 and n=21 (as provided in the task).
-    For any other number, return a clear message.
-    
-    The patterns shown in the task for 16 and 21 lines are not based on a
-    mathematical or repeatable generation rule. They are handcrafted and the
-    rotations/letter positions do not follow a consistent algorithmic pattern.
+        text = "FORMULAQSOLUTIONS"
+        L = len(text)
 
-    Since the instructions mentioned to follow the given outputs exactly, I
-    implemented the exact patterns for 16 and 21 lines as provided, and for
-    other values I return a clear message.
+        def seq(start, length):
+            return "".join(text[(start+i) % L] for i in range(length))
 
-    This ensures that the submitted output is accurate and matches the samples
-    precisely, without incorrect assumptions or failed pattern extrapolation.
-    
-    Args:
-        n (int): Number of lines for the pattern
-    
-    Returns:
-        str: Generated pattern as string or message for unsupported values
-    """
+        half = n // 2
+        lines = []
 
-    if n == 16:
-        return "\n".join([
-            "        F",
-            "       O-M",
-            "      RMULA",
-            "     M-----O",
-            "    ULAQSOLUT",
-            "   L----------N",
-            "  AQSOLUTIONSFO",
-            " Q--------------U",
-            "SOLUTIONSFORMULAQ",
-            " O--------------A",
-            "  LUTIONSFORMUL",
-            "   U----------U",
-            "    TIONSFORM",
-            "     I------R",
-            "      ONSFO",
-            "       N-F",
-            "        S"
-        ])
+        for i in range(n):
+            idx = i if i <= half else n - i - 1
+            space = " " * abs(half - idx)
+            size = 2 * idx + 1
+            start = i  # always continue forward sequence
+            inside = size - 2
 
-    if n == 21:
-        return "\n".join([
-            "         F",
-            "        O-M",
-            "       RMULA",
-            "      M-----O",
-            "     ULAQSOLUT",
-            "    L----------N",
-            "   AQSOLUTIONSFO",
-            "  Q--------------U",
-            " SOLUTIONSFORMULAQ",
-            " O----------------L",
-            "LUTIONSFORMULAQSOLUTI",
-            " U------------------T",
-            "  TIONSFORMULAQSOLU",
-            "   I----------------L",
-            "    ONSFORMULAQSO",
-            "     N------------S",
-            "      SFORMULAQ",
-            "       F------A",
-            "        ORMUL",
-            "         R-U",
-            "          M"
-        ])
+            if size == 1:
+                lines.append(space + text[start % L])
+                continue
 
-    return (
-        "Pattern is only defined for 16 and 21 lines "
-        "as per the challenge examples.\n"
-        "Please enter 16 or 21."
-    )
+            if i <= half:
+                if idx % 2 == 0:  # even => letter line
+                    lines.append(space + seq(idx, size))
+                else:             # odd => dashed line
+                    left = text[idx % L]
+                    right = text[(idx + size - 1) % L]
+                    lines.append(space + left + "-" * inside + right)
+            else:
+                if idx % 2 == 0:  # even => letter line
+                    lines.append(space + seq(start, size))
+                else:             # odd => dashed line
+                    left = text[start % L]
+                    right = text[(start + size - 1) % L]
+                    lines.append(space + left + "-" * inside + right)
+
+        return "\n".join(lines)
 
